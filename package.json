@@ -1,0 +1,63 @@
+{
+  "name": "vite-react-redux-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "yarn run watch:server & yarn run watch:client",
+    "watch:client": "yarn run lint:client && vite",
+    "watch:server": "yarn run lint:server && nodemon server/server.js dev",
+    "build": "vite build",
+    "lint": "yarn run lint:server && yarn run lint:client",
+    "lint:client": "eslint './client/**/*.js' './client/**/*.jsx'",
+    "lint:server": "eslint './server/**/*.js'",
+    "prepare": "husky install",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.7",
+    "axios": "^1.6.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "path": "^0.12.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.3",
+    "react-router-dom": "^6.20.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0",
+    "nodemon": "^3.0.1",
+    "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
+    "tailwindcss": "^3.3.5",
+    "vite": "^4.4.5",
+    "vite-plugin-eslint": "^1.8.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "client/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix --color"
+    ]
+  }
+}

@@ -4,9 +4,13 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { nanoid } from 'nanoid/non-secure'
 import { promises as fs } from 'fs'
+import passport from 'passport'
+import jwt from 'jsonwebtoken'
 
+import User from './models/User.model.js'
 import options from './config.js'
 import connectDB from './services/mongoose.js'
+import jwtStrategy from './services/passport.js'
 
 connectDB()
 
@@ -78,15 +82,62 @@ class Task {
 
 const middleware = [
   cors(),
+  passport.initialize(),
   cookieParser(),
   express.json({ limit: '50kb' }),
   express.static(resolve(__dirname, 'dist'))
 ]
 
+passport.use('jwt', jwtStrategy)
+
 middleware.forEach((it) => server.use(it))
 
 server.get('/', (req, res) => {
   res.send('Express Server')
+})
+
+server.get('/api/v1/test/user-info', async (req, res) => {
+  // const user = await User.findById(req.user.uid)
+  console.log(req.user.id)
+  res.json({ status: '123' })
+})
+
+server.post('/api/v1/login', async (req, res) => {
+  try {
+    const user = await User.findAndValidateUser(req.body)
+
+    const payload = { uid: user.id }
+    const token = jwt.sign(payload, options.secret, { expiresIn: '48h' })
+    delete user.password
+    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.json({ status: 'ok', token, user })
+  } catch (err) {
+    console.log(err)
+    res.json({ status: 'error', err })
+  }
+})
+
+server.post('/api/v1/registration', async (req, res) => {
+  try {
+    const { name, email, password } = req.body
+    const isUsedEmail = await User.findOne({ email })
+
+    if (isUsedEmail) {
+      res.json({ status: 'error' })
+      throw Error('Email is already used')
+    }
+    const user = new User({
+      email,
+      password,
+      name
+    })
+    user.save()
+
+    res.json({ status: 'ok' })
+  } catch (err) {
+    console.log(err)
+    res.json({ status: 'error', err })
+  }
 })
 
 server.get('/api/v1/categories', async (req, res) => {

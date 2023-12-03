@@ -1,8 +1,15 @@
 module.exports = {
   root: true,
-  extends: ['airbnb', 'prettier', 'plugin:react/recommended'],
+  extends: [
+    'airbnb',
+    'prettier',
+    'plugin:react/recommended',
+    'eslint:recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended'
+  ],
   parserOptions: {
-    ecmaVersion: 8,
+    ecmaVersion: 'latest',
     ecmaFeatures: {
       jsx: true
     }
@@ -24,6 +31,8 @@ module.exports = {
     ENABLE_SOCKETS: true
   },
   rules: {
+    'import/no-extraneous-dependencies': 0,
+    'import/no-import-module-exports': 0,
     'no-async-promise-executor': 0,
     'default-param-last': 0,
     'no-param-reassign': 0,

@@ -15,10 +15,18 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String
     },
+    isActivated: {
+      type: Boolean,
+      default: false
+    },
+    activationLink: {
+      type: String,
+      require: true
+    },
     createdTask: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Employee'
+        ref: 'Tasks'
       }
     ]
   },
@@ -63,4 +71,4 @@ userSchema.statics = {
   }
 }
 
-export default mongoose.model('users', userSchema)
+export default mongoose.model('Users', userSchema)

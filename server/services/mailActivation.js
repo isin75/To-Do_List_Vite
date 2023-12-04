@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import options from '../config'
+import options from '../config.js'
 
 const transporter = nodemailer.createTransport({
   host: options.smtpHost,
@@ -16,13 +16,13 @@ const sendActivationMail = async (to, link, name) => {
     from: options.smtpUser,
     to,
     subject: `${name}, welcome to the “To-Do List” App`,
-    html: (
+    html: `
       <div>
         <h1>
-          Hello, to activate your account, please follow the <a href={link}>Link</a>
+          Hello, to activate your account, please follow the <a href=${link}>Link</a>
         </h1>
       </div>
-    )
+    `
   })
 }
 

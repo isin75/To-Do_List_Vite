@@ -62,6 +62,9 @@ userSchema.statics = {
     if (!user) {
       throw new Error('No User')
     }
+    if (!user.isActivated) {
+      throw new Error('User not activated')
+    }
     const isPasswordOk = await user.passwordMatches(password)
     if (!isPasswordOk) {
       throw new Error('Incorrect Password')

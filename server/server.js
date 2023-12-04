@@ -6,11 +6,13 @@ import { nanoid } from 'nanoid/non-secure'
 import { promises as fs } from 'fs'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
+import { v4 as uuidv4 } from 'uuid'
 
 import User from './models/User.model.js'
 import options from './config.js'
 import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
+import sendActivationMail from './services/mailActivation.js'
 
 connectDB()
 
@@ -121,6 +123,7 @@ server.post('/api/v1/registration', async (req, res) => {
   try {
     const { name, email, password } = req.body
     const isUsedEmail = await User.findOne({ email })
+    const link = uuidv4()
 
     if (isUsedEmail) {
       res.json({ status: 'error' })
@@ -129,13 +132,31 @@ server.post('/api/v1/registration', async (req, res) => {
     const user = new User({
       email,
       password,
-      name
+      name,
+      activationLink: link
     })
-    user.save()
+    await user.save()
+
+    sendActivationMail(email, `${options.apiUrl}api/v1/activate/${link}`, name)
 
     res.json({ status: 'ok' })
   } catch (err) {
     console.log(err)
+    res.json({ status: 'error', err })
+  }
+})
+
+server.get('/api/v1/activate/:link', async (req, res) => {
+  try {
+    const { link } = req.params
+    const user = await User.findOne({ activationLink: link })
+    if (!user) {
+      throw new Error('Invalid activation link')
+    }
+    user.isActivated = true
+    await user.save()
+    res.json({ status: 'activated' })
+  } catch (err) {
     res.json({ status: 'error', err })
   }
 })

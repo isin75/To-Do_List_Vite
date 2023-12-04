@@ -2,7 +2,6 @@ import express from 'express'
 import { resolve } from 'path'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { promises as fs } from 'fs'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
@@ -21,54 +20,13 @@ const serverPort = options.port || 8080
 const server = express()
 const __dirname = process.cwd()
 
-const { readFile, writeFile } = fs
-
 const timeSpans = {
   day: 86400000,
   week: 604800000,
   month: 2592000000
 }
 
-const statusList = ['done', 'new', 'in progress', 'blocked']
-
-const toRead = async (category) => {
-  const getTaskData = await readFile(`${__dirname}/tasks/${category}.json`, { encoding: 'utf-8' })
-  const getTask = JSON.parse(getTaskData)
-  return getTask
-}
-
-const toWrite = async (category, addTask) => {
-  await writeFile(`${__dirname}/tasks/${category}.json`, JSON.stringify(addTask), {
-    encoding: 'utf-8'
-  })
-}
-
-const toFilterTimeSpans = (getTask, timespan) => {
-  const currentDay = +new Date()
-  return getTask.filter((task) => task.$createdAt > currentDay - timeSpans[timespan])
-}
-
-const toFilter = (getTask) => {
-  return getTask
-    .filter((task) => !task.$isDeleted)
-    .map((obj) => {
-      return Object.keys(obj).reduce((acc, key) => {
-        if (key[0] !== '$') {
-          return { ...acc, [key]: obj[key] }
-        }
-        return acc
-      }, {})
-    })
-}
-
-const toUpdateTask = (getTask, id, newValue) => {
-  return getTask.map((task) => {
-    if (task.taskId === id) {
-      return { ...task, ...newValue }
-    }
-    return task
-  })
-}
+const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
 const middleware = [
   cors(),
@@ -86,7 +44,7 @@ server.get('/', (req, res) => {
   res.send('Express Server')
 })
 
-server.get('/api/v1/test/user-info', async (req, res) => {
+server.get('/api/v1/test/user-info', auth(), async (req, res) => {
   // const user = await User.findById(req.user.uid)
   console.log(req.user.id)
   res.json({ status: '123' })
@@ -170,21 +128,23 @@ server.get('/api/v1/tasks/:category', auth(), async (req, res) => {
   }
 })
 
-server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
+server.get('/api/v1/tasks/:category/:timespan', auth(), async (req, res) => {
   try {
     const { category, timespan } = req.params
     const keys = Object.keys(timeSpans)
     const isCorrectUrl = keys.indexOf(timespan)
+    const currentDay = +new Date()
 
     if (isCorrectUrl < 0) {
       res.status('404')
       res.end()
     }
 
-    const getTask = await toRead(category).then((data) =>
-      toFilter(toFilterTimeSpans(data, timespan))
-    )
-    res.json(getTask)
+    const getTask = await Task.find()
+    const filterDeletedTask = getTask.filter((it) => !it.isDeleted && it.categories === category)
+    const task = filterDeletedTask.filter((it) => it.createdAt > currentDay - timeSpans[timespan])
+
+    res.json(task)
   } catch (error) {
     res.json({ status: 'error', message: 'Category not found' })
   }
@@ -221,45 +181,41 @@ server.post('/api/v1/tasks/:category', auth(), async (req, res) => {
   }
 })
 
-server.patch('/api/v1/tasks/:category/:id', async (req, res) => {
+server.patch('/api/v1/tasks/:category/:id', auth(), async (req, res) => {
   try {
     const { category, id } = req.params
-    const newStatus = req.body
-
-    const isCorrectStatus = statusList.indexOf(newStatus.status)
+    const newStatus = req.body.status
+    console.log(newStatus, id)
+    const isCorrectStatus = statusList.indexOf(newStatus)
     if (isCorrectStatus < 0) {
       res.json({ status: 'error', message: 'incorrect status' })
       res.end()
     }
-
-    const getTask = await toRead(category)
-
-    const isCorrectId = getTask.some((task) => task.taskId === id)
-    if (!isCorrectId) {
-      res.json({ status: 'error', message: 'Id not found' })
-      res.end()
+    const getTask = await Task.findById(id)
+    const isCategory = getTask.categories.includes(category)
+    if (!isCategory) {
+      res.json({ status: 'error', message: 'Category not found' })
     }
 
-    const updateStatus = toUpdateTask(getTask, id, newStatus)
-    await toWrite(category, updateStatus)
-    res.json(updateStatus)
-  } catch (error) {
-    res.json({ status: 'error', message: 'Category not found' })
+    const task = await Task.findByIdAndUpdate(id, { status: newStatus }, { new: true })
+    res.json(task)
+  } catch (err) {
+    res.json({ status: 'error', message: 'Error' })
   }
 })
 
-server.delete('/api/v1/tasks/:category/:id', async (req, res) => {
+server.delete('/api/v1/tasks/:category/:id', auth(), async (req, res) => {
   const { category, id } = req.params
-  const statusDeleted = { $isDeleted: true, $deletedAt: +new Date() }
-  const getTask = await toRead(category)
-  const isCorrectId = getTask.some((task) => task.taskId === id)
-  if (!isCorrectId) {
-    res.json({ status: 'error', message: 'Id not found' })
-    res.end()
+  const statusDeleted = { isDeleted: true, _deletedAt: +new Date() }
+  const getTask = await Task.findById(id)
+  const isCategory = getTask.categories.includes(category)
+
+  if (!isCategory) {
+    res.json({ status: 'error', message: 'Category not found' })
   }
-  const deleted = toUpdateTask(getTask, id, statusDeleted)
-  await toWrite(category, deleted)
-  res.json(deleted)
+
+  const task = await Task.findByIdAndUpdate(id, { $set: statusDeleted }, { new: true })
+  res.json(task)
 })
 
 const serverListen = server.listen(serverPort, () => {

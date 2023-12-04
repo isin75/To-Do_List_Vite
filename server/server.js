@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 
 import User from './models/User.model.js'
-import Task from './models/Token.model.js'
+import Task from './models/Task.model.js'
 import options from './config.js'
 import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
@@ -21,7 +21,7 @@ const serverPort = options.port || 8080
 const server = express()
 const __dirname = process.cwd()
 
-const { readFile, writeFile, readdir } = fs
+const { readFile, writeFile } = fs
 
 const timeSpans = {
   day: 86400000,
@@ -149,14 +149,12 @@ server.get('/api/v1/activate/:link', async (req, res) => {
   }
 })
 
-server.get('/api/v1/categories', async (req, res) => {
+server.get('/api/v1/categories', auth(), async (req, res) => {
   try {
-    const categoriesList = await readdir(`${__dirname}/tasks`, { encoding: 'utf-8' }).then(
-      (categoriesName) => categoriesName.map((categories) => categories.slice(0, -5))
-    )
-    res.json(categoriesList)
+    const { categoriesTask } = req.user
+    res.json(categoriesTask)
   } catch (error) {
-    res.json({ status: 'error', message: 'Folder tasks not found' })
+    res.json({ status: 'error', message: 'Tasks not found' })
   }
 })
 
@@ -192,22 +190,33 @@ server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
 })
 
 server.post('/api/v1/tasks/:category', auth(), async (req, res) => {
-  const { title } = req.body
-  const { category } = req.params
-  const { id } = req.user
-  const newTask = new Task({
-    categories: category,
-    title,
-    userId: id
-  })
   try {
-    const getTask = await toRead(category)
-    const addTask = [...getTask, newTask]
-    await toWrite(category, addTask)
-    res.json({ status: 'ok', addTask })
-  } catch (error) {
-    await toWrite(category, [newTask])
-    res.json({ status: 'success', newTask })
+    const { title } = req.body
+    const categories = req.params.category
+    const userId = req.user.id
+    const task = new Task({
+      categories,
+      title,
+      userId
+    })
+    await task.save()
+    console.log(task)
+    const user = await User.findById(userId)
+    const isNewCategory = user.categoriesTask.includes(categories)
+    if (user) {
+      user.createdTask.push(task)
+      if (!isNewCategory) {
+        user.categoriesTask.push(categories)
+      }
+      await user.save()
+      console.log('201: Task add')
+    } else {
+      console.log('404: User not found')
+    }
+
+    res.json({ status: 'ok', task })
+  } catch (err) {
+    res.json({ status: 'error', err })
   }
 })
 

@@ -2,17 +2,18 @@ import express from 'express'
 import { resolve } from 'path'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { nanoid } from 'nanoid/non-secure'
 import { promises as fs } from 'fs'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
 
 import User from './models/User.model.js'
+import Task from './models/Token.model.js'
 import options from './config.js'
 import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
+import auth from './middleware/auth.js'
 
 connectDB()
 
@@ -21,8 +22,6 @@ const server = express()
 const __dirname = process.cwd()
 
 const { readFile, writeFile, readdir } = fs
-
-const taskId = nanoid()
 
 const timeSpans = {
   day: 86400000,
@@ -69,17 +68,6 @@ const toUpdateTask = (getTask, id, newValue) => {
     }
     return task
   })
-}
-
-class Task {
-  constructor(taskTitle) {
-    this.taskId = taskId
-    this.title = taskTitle
-    this.$isDeleted = false
-    this.$createdAt = +new Date()
-    this.$deletedAt = null
-    this.status = 'new'
-  }
 }
 
 const middleware = [
@@ -203,10 +191,15 @@ server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
   }
 })
 
-server.post('/api/v1/tasks/:category', async (req, res) => {
-  const newTaskTitle = req.body.title
+server.post('/api/v1/tasks/:category', auth(), async (req, res) => {
+  const { title } = req.body
   const { category } = req.params
-  const newTask = new Task(newTaskTitle)
+  const { id } = req.user
+  const newTask = new Task({
+    categories: category,
+    title,
+    userId: id
+  })
   try {
     const getTask = await toRead(category)
     const addTask = [...getTask, newTask]

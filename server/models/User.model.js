@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       require: true
     },
+    categoriesTask: [
+      {
+        type: String,
+        ref: 'Tasks'
+      }
+    ],
     createdTask: [
       {
         type: mongoose.Schema.Types.ObjectId,

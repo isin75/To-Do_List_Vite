@@ -2,6 +2,10 @@ import mongoose from 'mongoose'
 
 const taskSchema = new mongoose.Schema(
   {
+    categories: {
+      type: String,
+      required: true
+    },
     title: {
       type: String,
       required: true

@@ -158,12 +158,13 @@ server.get('/api/v1/categories', auth(), async (req, res) => {
   }
 })
 
-server.get('/api/v1/tasks/:category', async (req, res) => {
+server.get('/api/v1/tasks/:category', auth(), async (req, res) => {
   try {
     const { category } = req.params
-    const getTask = await toRead(category).then((data) => toFilter(data))
+    const getTask = await Task.find()
+    const task = getTask.filter((it) => !it.isDeleted && it.categories === category)
 
-    res.json(getTask)
+    res.json(task)
   } catch (error) {
     res.json({ status: 'error', message: 'Category not found' })
   }

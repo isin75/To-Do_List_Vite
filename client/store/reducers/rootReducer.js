@@ -1,8 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit'
-import slice from './slice'
+import authSlice from './AuthSlice'
+import toDoSlice from './To-DoSlice'
 
 const rootReducer = combineReducers({
-  slice
+  authSlice,
+  toDoSlice
 })
 
 export default rootReducer

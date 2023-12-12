@@ -1,5 +1,12 @@
 module.exports = {
   root: true,
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.json', 'css', 'scss', 'sass']
+      }
+    }
+  },
   extends: [
     'airbnb',
     'prettier',
@@ -45,7 +52,7 @@ module.exports = {
         unnamedComponents: 'arrow-function'
       }
     ],
-    'prettier/prettier': ['warn'],
+    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'space-before-function-paren': 'off',
     'react/prefer-stateless-function': 'warn',
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],

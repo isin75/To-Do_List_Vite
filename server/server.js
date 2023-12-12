@@ -23,7 +23,8 @@ const __dirname = process.cwd()
 const timeSpans = {
   day: 86400000,
   week: 604800000,
-  month: 2592000000
+  month: 2592000000,
+  done: 'done'
 }
 
 const statusList = ['Done', 'New', 'In progress', 'Blocked']
@@ -45,9 +46,21 @@ server.get('/', (req, res) => {
 })
 
 server.get('/api/v1/test/user-info', auth(), async (req, res) => {
-  // const user = await User.findById(req.user.uid)
-  console.log(req.user.id)
   res.json({ status: '123' })
+})
+
+server.get('/api/v1/auth', async (req, res) => {
+  try {
+    const jwtUser = jwt.verify(req.cookies.token, options.secret)
+    const user = await User.findById(jwtUser.uid)
+    const payload = { uid: user.id }
+    const token = jwt.sign(payload, options.secret, { expiresIn: '48h' })
+    delete user.password
+    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.json({ status: 'ok', token, user })
+  } catch (err) {
+    res.json({ status: 'error', err })
+  }
 })
 
 server.post('/api/v1/login', async (req, res) => {
@@ -60,7 +73,6 @@ server.post('/api/v1/login', async (req, res) => {
     res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
     res.json({ status: 'ok', token, user })
   } catch (err) {
-    console.log(err)
     res.json({ status: 'error', err })
   }
 })
@@ -83,11 +95,10 @@ server.post('/api/v1/registration', async (req, res) => {
     })
     await user.save()
 
-    sendActivationMail(email, `${options.apiUrl}api/v1/activate/${link}`, name)
+    sendActivationMail(email, `${options.clientApi}/activate/${link}`, name)
 
     res.json({ status: 'ok' })
   } catch (err) {
-    console.log(err)
     res.json({ status: 'error', err })
   }
 })
@@ -119,8 +130,12 @@ server.get('/api/v1/categories', auth(), async (req, res) => {
 server.get('/api/v1/tasks/:category', auth(), async (req, res) => {
   try {
     const { category } = req.params
-    const getTask = await Task.find()
-    const task = getTask.filter((it) => !it.isDeleted && it.categories === category)
+    const userId = req.user.id
+    const task = await Task.find({
+      categories: category,
+      userId,
+      isDeleted: false
+    })
 
     res.json(task)
   } catch (error) {
@@ -131,6 +146,7 @@ server.get('/api/v1/tasks/:category', auth(), async (req, res) => {
 server.get('/api/v1/tasks/:category/:timespan', auth(), async (req, res) => {
   try {
     const { category, timespan } = req.params
+    const userId = req.user.id
     const keys = Object.keys(timeSpans)
     const isCorrectUrl = keys.indexOf(timespan)
     const currentDay = +new Date()
@@ -140,11 +156,18 @@ server.get('/api/v1/tasks/:category/:timespan', auth(), async (req, res) => {
       res.end()
     }
 
-    const getTask = await Task.find()
-    const filterDeletedTask = getTask.filter((it) => !it.isDeleted && it.categories === category)
-    const task = filterDeletedTask.filter((it) => it.createdAt > currentDay - timeSpans[timespan])
-
-    res.json(task)
+    const filterDeletedTask = await Task.find({
+      categories: category,
+      userId,
+      isDeleted: false
+    })
+    if (timespan === 'done') {
+      const task = filterDeletedTask.filter((it) => it.status === 'Done')
+      res.json(task)
+    } else {
+      const task = filterDeletedTask.filter((it) => it.createdAt > currentDay - timeSpans[timespan])
+      res.json(task)
+    }
   } catch (error) {
     res.json({ status: 'error', message: 'Category not found' })
   }
@@ -155,25 +178,24 @@ server.post('/api/v1/tasks/:category', auth(), async (req, res) => {
     const { title } = req.body
     const categories = req.params.category
     const userId = req.user.id
-    const task = new Task({
+    const newTask = new Task({
       categories,
       title,
       userId
     })
-    await task.save()
-    console.log(task)
+    await newTask.save()
     const user = await User.findById(userId)
     const isNewCategory = user.categoriesTask.includes(categories)
     if (user) {
-      user.createdTask.push(task)
+      user.createdTask.push(newTask)
       if (!isNewCategory) {
         user.categoriesTask.push(categories)
       }
       await user.save()
-      console.log('201: Task add')
-    } else {
-      console.log('404: User not found')
     }
+
+    const getTask = await Task.find()
+    const task = getTask.filter((it) => !it.isDeleted && it.categories === categories)
 
     res.json({ status: 'ok', task })
   } catch (err) {
@@ -184,21 +206,25 @@ server.post('/api/v1/tasks/:category', auth(), async (req, res) => {
 server.patch('/api/v1/tasks/:category/:id', auth(), async (req, res) => {
   try {
     const { category, id } = req.params
-    const newStatus = req.body.status
-    console.log(newStatus, id)
-    const isCorrectStatus = statusList.indexOf(newStatus)
-    if (isCorrectStatus < 0) {
-      res.json({ status: 'error', message: 'incorrect status' })
-      res.end()
-    }
-    const getTask = await Task.findById(id)
-    const isCategory = getTask.categories.includes(category)
-    if (!isCategory) {
-      res.json({ status: 'error', message: 'Category not found' })
+    const { payload } = req.body
+    if ('status' in payload) {
+      const isCorrectStatus = statusList.indexOf(payload.status)
+      if (isCorrectStatus < 0) {
+        res.json({ status: 'error', message: 'incorrect status' })
+        return
+      }
+      const getTask = await Task.findById(id)
+      const isCategory = await getTask.categories.includes(category)
+      if (!isCategory) {
+        res.json({ status: 'error', message: 'Category not found' })
+        return
+      }
     }
 
-    const task = await Task.findByIdAndUpdate(id, { status: newStatus }, { new: true })
-    res.json(task)
+    await Task.findByIdAndUpdate(id, payload, { new: true })
+    const task = await Task.find()
+    const taskFilter = task.filter((it) => !it.isDeleted && it.categories === category)
+    res.json(taskFilter)
   } catch (err) {
     res.json({ status: 'error', message: 'Error' })
   }

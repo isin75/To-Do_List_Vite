@@ -13,6 +13,7 @@ import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
 import auth from './middleware/auth.js'
+import Html from '../client/Html.js'
 
 connectDB()
 
@@ -95,7 +96,7 @@ server.post('/api/v1/registration', async (req, res) => {
     })
     await user.save()
 
-    sendActivationMail(email, `${options.clientApi}/activate/${link}`, name)
+    sendActivationMail(email, `${options.clientApi}api/v1/activate/${link}`, name)
 
     res.json({ status: 'ok' })
   } catch (err) {
@@ -242,6 +243,19 @@ server.delete('/api/v1/tasks/:category/:id', auth(), async (req, res) => {
 
   const task = await Task.findByIdAndUpdate(id, { $set: statusDeleted }, { new: true })
   res.json(task)
+})
+
+server.get('/*', (req, res) => {
+  const initialState = {
+    location: req.url
+  }
+
+  return res.send(
+    Html({
+      body: '',
+      initialState
+    })
+  )
 })
 
 const serverListen = server.listen(serverPort, () => {

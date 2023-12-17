@@ -1,5 +1,4 @@
 import express from 'express'
-import { resolve } from 'path'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import passport from 'passport'
@@ -19,7 +18,6 @@ connectDB()
 
 const serverPort = options.port || 8080
 const server = express()
-const __dirname = process.cwd()
 
 const timeSpans = {
   day: 86400000,
@@ -30,13 +28,7 @@ const timeSpans = {
 
 const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
-const middleware = [
-  cors(),
-  passport.initialize(),
-  cookieParser(),
-  express.json({ limit: '50kb' }),
-  express.static(resolve(__dirname, 'dist'))
-]
+const middleware = [cors(), passport.initialize(), cookieParser(), express.json({ limit: '50kb' })]
 
 passport.use('jwt', jwtStrategy)
 

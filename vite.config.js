@@ -22,5 +22,15 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
+  },
+  preview: {
+    port: 8088,
+    proxy: {
+      '/api': {
+        target: 'http://to-do-list-vite-server.vercel.app',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
   }
 })

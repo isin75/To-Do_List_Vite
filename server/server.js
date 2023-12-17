@@ -12,7 +12,6 @@ import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
 import auth from './middleware/auth.js'
-import Html from '../client/Html.js'
 
 connectDB()
 
@@ -235,19 +234,6 @@ server.delete('/api/v1/tasks/:category/:id', auth(), async (req, res) => {
 
   const task = await Task.findByIdAndUpdate(id, { $set: statusDeleted }, { new: true })
   res.json(task)
-})
-
-server.get('/*', (req, res) => {
-  const initialState = {
-    location: req.url
-  }
-
-  return res.send(
-    Html({
-      body: '',
-      initialState
-    })
-  )
 })
 
 const serverListen = server.listen(serverPort, () => {

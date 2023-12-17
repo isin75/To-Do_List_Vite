@@ -12,7 +12,7 @@
   "scripts": {
     "start:server": "node server/server.js",
     "start:client": "vite",
-    "dev": "yarn run watch:server & yarn run watch:client",
+    "dev": "yarn run watch:client",
     "watch:client": "yarn run lint:client && vite",
     "watch:server": "yarn run lint:server && nodemon server/server.js dev",
     "build": "vite build",

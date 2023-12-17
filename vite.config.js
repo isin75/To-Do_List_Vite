@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 import eslintPlugin from 'vite-plugin-eslint'
 import react from '@vitejs/plugin-react'
+import options from './server/config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +18,7 @@ export default defineConfig({
     port: 8087,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: options.apiUrl,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }

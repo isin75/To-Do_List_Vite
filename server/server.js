@@ -12,7 +12,6 @@ import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
 import auth from './middleware/auth.js'
-import allowCors from './services/headers.js'
 
 connectDB()
 
@@ -28,13 +27,20 @@ const timeSpans = {
 
 const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
-const middleware = [
-  cors(),
-  passport.initialize(),
-  cookieParser(),
-  express.json({ limit: '50kb' }),
-  allowCors
-]
+const middleware = [cors(), passport.initialize(), cookieParser(), express.json({ limit: '50kb' })]
+
+server.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://to-do-list-vite-mauve.vercel.app')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200)
+  } else {
+    next()
+  }
+})
 
 passport.use('jwt', jwtStrategy)
 

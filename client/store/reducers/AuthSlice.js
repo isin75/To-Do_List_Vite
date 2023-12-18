@@ -1,11 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
-import options from '../../config'
 
 const cookies = new Cookies()
 
-const baseUrl = `${options.clientApi}/api/v1`
+const baseUrl = 'https://to-do-list-vite-server.vercel.app/api/v1'
 
 export const trySigIn = createAsyncThunk('auth/trySigIn', async () => {
   const { data } = await axios(`${baseUrl}/auth`)

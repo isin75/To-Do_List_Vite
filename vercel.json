@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "http://to-do-list-vite-server.vercel.app"
+    }
+  ]
+}

@@ -1,17 +1,20 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
+import options from '../../config'
 
 const cookies = new Cookies()
 
+const baseUrl = `${options.clientApi}/api/v1`
+
 export const trySigIn = createAsyncThunk('auth/trySigIn', async () => {
-  const { data } = await axios('/api/v1/auth')
+  const { data } = await axios(`${baseUrl}/auth`)
   return data
 })
 
 export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, password }) => {
   const { data } = await axios.post(
-    '/api/v1/login',
+    `${baseUrl}/login`,
     {
       email,
       password
@@ -26,14 +29,14 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 })
 
 export const activatedUser = createAsyncThunk('auth/activatedUser', async (link) => {
-  await axios(`/api/v1/activate/${link}`)
+  await axios(`${baseUrl}/activate/${link}`)
 })
 
 export const registerUser = createAsyncThunk(
   'auth/RegisterUser',
   async ({ name, email, password }) => {
     const { data } = await axios.post(
-      '/api/v1/registration',
+      `${baseUrl}/registration`,
       {
         name,
         email,

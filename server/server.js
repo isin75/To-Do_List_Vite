@@ -33,7 +33,7 @@ const middleware = [
   passport.initialize(),
   cookieParser(),
   express.json({ limit: '50kb' }),
-  allowCors()
+  allowCors
 ]
 
 passport.use('jwt', jwtStrategy)

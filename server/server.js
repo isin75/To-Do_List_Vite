@@ -12,7 +12,7 @@ import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
 import auth from './middleware/auth.js'
-import allowCors from './services/headers.js'
+import { allowCors } from './services/headers.js'
 
 connectDB()
 

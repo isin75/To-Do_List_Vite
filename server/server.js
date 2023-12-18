@@ -12,6 +12,7 @@ import connectDB from './services/mongoose.js'
 import jwtStrategy from './services/passport.js'
 import sendActivationMail from './services/mailActivation.js'
 import auth from './middleware/auth.js'
+import allowCors from './services/headers.js'
 
 connectDB()
 
@@ -27,22 +28,12 @@ const timeSpans = {
 
 const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
-const headers = (req, res, next) => {
-  res.set(
-    'Access-Control-Allow-Origin',
-    'https://to-do-list-vite-iv32luzea-ivan-shyshykins-projects.vercel.app'
-  )
-  res.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
-  res.set('Access-Control-Allow-Headers', 'Content-Type')
-  next()
-}
-
 const middleware = [
   cors(),
   passport.initialize(),
   cookieParser(),
   express.json({ limit: '50kb' }),
-  headers()
+  allowCors()
 ]
 
 passport.use('jwt', jwtStrategy)

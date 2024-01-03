@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import passport from 'passport'
 import jwt from 'jsonwebtoken'
-import { v4 as uuidv4 } from 'uuid'
 
 import User from './models/User.model.js'
 import Task from './models/Task.model.js'
@@ -93,7 +92,7 @@ server.post('/api/v1/registration', async (req, res) => {
   try {
     const { name, email, password } = req.body
     const isUsedEmail = await User.findOne({ email })
-    const link = uuidv4()
+    const code = Math.floor(100000 + Math.random() * 900000)
 
     if (isUsedEmail) {
       res.json({ status: 'error' })
@@ -103,11 +102,11 @@ server.post('/api/v1/registration', async (req, res) => {
       email,
       password,
       name,
-      activationLink: link
+      activationLink: code
     })
     await user.save()
 
-    sendActivationMail(email, `${options.clientApi}api/v1/activate/${link}`, name)
+    sendActivationMail(email, code, name)
 
     res.json({ status: 'ok' })
   } catch (err) {
@@ -115,10 +114,10 @@ server.post('/api/v1/registration', async (req, res) => {
   }
 })
 
-server.get('/api/v1/activate/:link', async (req, res) => {
+server.get('/api/v1/activate', async (req, res) => {
   try {
-    const { link } = req.params
-    const user = await User.findOne({ activationLink: link })
+    const { code } = req.body
+    const user = await User.findOne({ activationLink: code })
     if (!user) {
       throw new Error('Invalid activation link')
     }
@@ -126,7 +125,7 @@ server.get('/api/v1/activate/:link', async (req, res) => {
     await user.save()
     res.json({ status: 'activated' })
   } catch (err) {
-    res.json({ status: 'error', err })
+    res.json({ status: 'error', message: err.message })
   }
 })
 

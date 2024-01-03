@@ -28,8 +28,20 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
   return data
 })
 
-export const activatedUser = createAsyncThunk('auth/activatedUser', async (link) => {
-  await axios(`${baseUrl}activate/${link}`)
+export const activatedUser = createAsyncThunk('auth/activatedUser', async (code) => {
+  const { data } = await axios.post(
+    `${baseUrl}activate`,
+    {
+      code
+    },
+    {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+  return data.status
 })
 
 export const registerUser = createAsyncThunk(
@@ -43,6 +55,7 @@ export const registerUser = createAsyncThunk(
         password
       },
       {
+        withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -60,7 +73,9 @@ const initialState = {
   user: {},
   status: null,
   error: null,
-  from: null
+  from: null,
+  code: null,
+  activatedStatus: null
 }
 
 const authSlice = createSlice({
@@ -84,6 +99,9 @@ const authSlice = createSlice({
     },
     setToken: (state) => {
       state.token = null
+    },
+    setCode: (state, { payload: code }) => {
+      state.code = code
     }
   },
   extraReducers: {
@@ -117,13 +135,14 @@ const authSlice = createSlice({
       state.status = 'loading'
       state.error = null
     },
-    [activatedUser.fulfilled]: (state) => {
+    [activatedUser.fulfilled]: (state, actions) => {
       state.status = 'resolve'
+      state.activatedStatus = actions.payload
     }
   }
 })
 
 export default authSlice.reducer
 
-export const { setEmail, setPassword, login, setName, setFrom, setUser, setToken } =
+export const { setEmail, setPassword, login, setName, setFrom, setUser, setToken, setCode } =
   authSlice.actions

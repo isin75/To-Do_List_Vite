@@ -63,6 +63,9 @@ const Login = () => {
           <Typography.Text>
             No account? <Link to="/registration">Register</Link>
           </Typography.Text>
+          <Typography.Text>
+            <Link to="/activate">Activate account</Link>
+          </Typography.Text>
         </Space>
       </Card>
     </Row>

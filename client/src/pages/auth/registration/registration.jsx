@@ -68,6 +68,9 @@ const Register = () => {
             <Typography.Text>
               Have an account? <Link to="/login">Login</Link>
             </Typography.Text>
+            <Typography.Text>
+              <Link to="/activate">Activate account</Link>
+            </Typography.Text>
           </Space>
         </Card>
       )}

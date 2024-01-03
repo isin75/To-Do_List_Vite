@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-const sendActivationMail = async (to, link, name) => {
+const sendActivationMail = async (to, code, name) => {
   await transporter.sendMail({
     from: options.smtpUser,
     to,
@@ -19,7 +19,7 @@ const sendActivationMail = async (to, link, name) => {
     html: `
       <div>
         <h1>
-          Hello, to activate your account, please follow the <a href=${link}>Link</a>
+          Hello, to activate your account, please enter this code: ${code}
         </h1>
       </div>
     `

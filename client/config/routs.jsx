@@ -20,7 +20,7 @@ const router = createBrowserRouter(
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="registration" element={<Register />} />
-        <Route path="activate/:link" element={<Activated />} />
+        <Route path="activate" element={<Activated />} />
       </Route>
     </Route>
   )

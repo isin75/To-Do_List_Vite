@@ -12,17 +12,28 @@ const transporter = nodemailer.createTransport({
 })
 
 const sendActivationMail = async (to, code, name) => {
-  await transporter.sendMail({
-    from: options.smtpUser,
-    to,
-    subject: `${name}, welcome to the “To-Do List” App`,
-    html: `
-      <div>
-        <h1>
-          Hello, to activate your account, please enter this code: ${code}
-        </h1>
-      </div>
-    `
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(
+      {
+        from: options.smtpUser,
+        to,
+        subject: `${name}, welcome to the “To-Do List” App`,
+        html: `
+        <div>
+          <h1>
+            Hello, to activate your account, please enter this code: ${code}
+          </h1>
+        </div>
+      `
+      },
+      (error, info) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(info)
+        }
+      }
+    )
   })
 }
 

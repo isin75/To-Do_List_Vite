@@ -114,7 +114,7 @@ server.post('/api/v1/registration', async (req, res) => {
   }
 })
 
-server.get('/api/v1/activate', async (req, res) => {
+server.post('/api/v1/activate', async (req, res) => {
   try {
     const { code } = req.body
     const user = await User.findOne({ activationLink: code })

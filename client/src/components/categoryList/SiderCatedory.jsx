@@ -19,7 +19,7 @@ const SiderCatedory = () => {
     setTimeout(() => {
       dispatch(getCategories())
       return () => {}
-    }, 2000)
+    }, 1000)
   }, [taskAddInSession, isModalOpen])
   return (
     <Menu

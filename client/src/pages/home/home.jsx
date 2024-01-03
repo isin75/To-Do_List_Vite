@@ -31,7 +31,7 @@ const Tasks = () => {
       dispatch(getTasks({ category, timespan }))
       setCurrentPage(1)
       return () => {}
-    }, 2000)
+    }, 1000)
   }, [taskAddInSession, category, timespan, isModalOpen])
 
   return (

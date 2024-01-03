@@ -106,7 +106,7 @@ server.post('/api/v1/registration', async (req, res) => {
     })
     await user.save()
 
-    sendActivationMail(email, code, name)
+    await sendActivationMail(email, code, name)
 
     res.json({ status: 'ok' })
   } catch (err) {

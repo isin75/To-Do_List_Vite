@@ -85,7 +85,7 @@ server.post('/api/v1/login', async (req, res) => {
     })
     res.json({ status: 'ok', token, user })
   } catch (err) {
-    res.json({ status: 'error', err })
+    res.json({ status: 'error', message: err.message })
   }
 })
 

@@ -29,7 +29,7 @@ const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
 const middleware = [
   cors({
-    origin: 'https://slack-vite.vercel.app',
+    origin: 'https://to-do-list-vite-mauve.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']

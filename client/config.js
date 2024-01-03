@@ -1,5 +1,5 @@
 const config = {
-  api: 'https://slack-vite-vern.vercel.app/api/v1/'
+  api: 'https://to-do-list-vite-3ck2.vercel.app/api/v1/'
 }
 
 export default config

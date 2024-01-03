@@ -12,7 +12,10 @@ const Layouts = () => {
   const location = useLocation()
   const { isTheme } = useSelector((s) => s.toDoSlice)
 
-  const shouldShowSidebar = location.pathname !== '/login' && location.pathname !== '/registration'
+  const shouldShowSidebar =
+    location.pathname !== '/login' &&
+    location.pathname !== '/registration' &&
+    location.pathname !== '/activate'
   const algorithm = isTheme ? theme.darkAlgorithm : theme.defaultAlgorithm
 
   return (

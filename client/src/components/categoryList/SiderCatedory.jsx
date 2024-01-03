@@ -16,8 +16,10 @@ const SiderCatedory = () => {
   }))
 
   useEffect(() => {
-    dispatch(getCategories())
-    return () => {}
+    setTimeout(() => {
+      dispatch(getCategories())
+      return () => {}
+    }, 2000)
   }, [taskAddInSession, isModalOpen])
   return (
     <Menu

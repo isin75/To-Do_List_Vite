@@ -27,9 +27,11 @@ const Tasks = () => {
   }
 
   useEffect(() => {
-    dispatch(getTasks({ category, timespan }))
-    setCurrentPage(1)
-    return () => {}
+    setTimeout(() => {
+      dispatch(getTasks({ category, timespan }))
+      setCurrentPage(1)
+      return () => {}
+    }, 2000)
   }, [taskAddInSession, category, timespan, isModalOpen])
 
   return (

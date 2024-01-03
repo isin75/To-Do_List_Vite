@@ -27,7 +27,17 @@ const timeSpans = {
 
 const statusList = ['Done', 'New', 'In progress', 'Blocked']
 
-const middleware = [cors(), passport.initialize(), cookieParser(), express.json({ limit: '50kb' })]
+const middleware = [
+  cors({
+    origin: 'https://slack-vite.vercel.app',
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+  }),
+  passport.initialize(),
+  cookieParser(),
+  express.json({ limit: '50kb' })
+]
 
 passport.use('jwt', jwtStrategy)
 
@@ -48,7 +58,12 @@ server.get('/api/v1/auth', async (req, res) => {
     const payload = { uid: user.id }
     const token = jwt.sign(payload, options.secret, { expiresIn: '48h' })
     delete user.password
-    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.cookie('token', token, {
+      maxAge: 1000 * 60 * 60 * 48,
+      path: '/',
+      secure: 'true',
+      sameSite: 'none'
+    })
     res.json({ status: 'ok', token, user })
   } catch (err) {
     res.json({ status: 'error', err })
@@ -62,7 +77,12 @@ server.post('/api/v1/login', async (req, res) => {
     const payload = { uid: user.id }
     const token = jwt.sign(payload, options.secret, { expiresIn: '48h' })
     delete user.password
-    res.cookie('token', token, { maxAge: 1000 * 60 * 60 * 48 })
+    res.cookie('token', token, {
+      maxAge: 1000 * 60 * 60 * 48,
+      path: '/',
+      secure: 'true',
+      sameSite: 'none'
+    })
     res.json({ status: 'ok', token, user })
   } catch (err) {
     res.json({ status: 'error', err })

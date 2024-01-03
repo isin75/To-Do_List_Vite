@@ -1,24 +1,25 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import Cookies from 'universal-cookie'
 import axios from 'axios'
+import config from '../../config'
 
 const cookies = new Cookies()
-
-const baseUrl = 'https://to-do-list-vite-server.vercel.app/api/v1'
+const baseUrl = config.api
 
 export const trySigIn = createAsyncThunk('auth/trySigIn', async () => {
-  const { data } = await axios(`${baseUrl}/auth`)
+  const { data } = await axios(`${baseUrl}/auth`, { withCredentials: true })
   return data
 })
 
 export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, password }) => {
   const { data } = await axios.post(
-    `${baseUrl}/login`,
+    `${baseUrl}login`,
     {
       email,
       password
     },
     {
+      withCredentials: true,
       headers: {
         'Content-Type': 'application/json'
       }
@@ -28,14 +29,14 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 })
 
 export const activatedUser = createAsyncThunk('auth/activatedUser', async (link) => {
-  await axios(`${baseUrl}/activate/${link}`)
+  await axios(`${baseUrl}activate/${link}`)
 })
 
 export const registerUser = createAsyncThunk(
   'auth/RegisterUser',
   async ({ name, email, password }) => {
     const { data } = await axios.post(
-      `${baseUrl}/registration`,
+      `${baseUrl}registration`,
       {
         name,
         email,

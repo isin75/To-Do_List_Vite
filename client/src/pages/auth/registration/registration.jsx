@@ -34,7 +34,8 @@ const Register = () => {
       {isClick ? (
         <div>
           <h1 className="text-lg font-medium px-2 m-6">
-            To activate your account, follow the link sent to your email.
+            To activate your account, enter the code sent to your email{' '}
+            <Link to="/activate">here</Link>.
           </h1>
         </div>
       ) : (
@@ -67,7 +68,7 @@ const Register = () => {
           <Space direction="vertical" size="large">
             <Typography.Text>
               Have an account? <Link to="/login">Login</Link> Or
-              <Link to="/activate">Activate account</Link>
+              <Link to="/activate"> Activate account</Link>
             </Typography.Text>
           </Space>
         </Card>

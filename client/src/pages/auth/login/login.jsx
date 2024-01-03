@@ -62,7 +62,7 @@ const Login = () => {
         <Space direction="vertical" size="large">
           <Typography.Text>
             No account? <Link to="/registration">Register</Link> Or
-            <Link to="/activate">Activate account</Link>
+            <Link to="/activate"> Activate account</Link>
           </Typography.Text>
         </Space>
       </Card>

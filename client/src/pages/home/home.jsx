@@ -10,7 +10,7 @@ import Welcome from '../../components/welcom/Welcome'
 // import Modal from '../../components/modal/Modal'
 
 const Tasks = () => {
-  const { tasks, taskAddInSession } = useSelector((s) => s.toDoSlice)
+  const { tasks, taskAddInSession, isModalOpen } = useSelector((s) => s.toDoSlice)
   const dispatch = useDispatch()
   const { category, timespan } = useParams()
   const [currentPage, setCurrentPage] = useState(1)
@@ -30,7 +30,7 @@ const Tasks = () => {
     dispatch(getTasks({ category, timespan }))
     setCurrentPage(1)
     return () => {}
-  }, [taskAddInSession, category, timespan])
+  }, [taskAddInSession, category, timespan, isModalOpen])
 
   return (
     <div className="flex flex-col justify-start items-center h-full w-full">

@@ -5,7 +5,7 @@ import { Menu } from 'antd'
 import { getCategories } from '../../../store/reducers/To-DoSlice'
 
 const SiderCatedory = () => {
-  const { userCategories, taskAddInSession } = useSelector((s) => s.toDoSlice)
+  const { userCategories, taskAddInSession, isModalOpen } = useSelector((s) => s.toDoSlice)
   const { category } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -18,7 +18,7 @@ const SiderCatedory = () => {
   useEffect(() => {
     dispatch(getCategories())
     return () => {}
-  }, [taskAddInSession])
+  }, [taskAddInSession, isModalOpen])
   return (
     <Menu
       mode="inline"

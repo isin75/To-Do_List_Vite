@@ -67,9 +67,7 @@ const Register = () => {
           <Space direction="vertical" size="large">
             <Typography.Text>
               Have an account? <Link to="/login">Login</Link>
-            </Typography.Text>
-            <Typography.Text>
-              <Link to="/activate">Activate account</Link>
+              Or <Link to="/activate">Activate account</Link>
             </Typography.Text>
           </Space>
         </Card>

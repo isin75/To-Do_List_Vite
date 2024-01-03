@@ -114,9 +114,9 @@ server.post('/api/v1/registration', async (req, res) => {
   }
 })
 
-server.get('/api/v1/activate', async (req, res) => {
+server.get('/api/v1/activate/:code', async (req, res) => {
   try {
-    const { code } = req.body
+    const { code } = req.params
     const user = await User.findOne({ activationLink: code })
     if (!user) {
       throw new Error('Invalid activation link')

@@ -28,7 +28,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
   return data
 })
 
-export const activatedUser = createAsyncThunk('auth/activatedUser', async (code) => {
+export const activatedUser = createAsyncThunk('auth/activatedUser', async ({ code }) => {
   const { data } = await axios.post(`${baseUrl}activate/${code}`, {
     withCredentials: true
   })

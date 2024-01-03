@@ -7,7 +7,7 @@ const cookies = new Cookies()
 const baseUrl = config.api
 
 export const trySigIn = createAsyncThunk('auth/trySigIn', async () => {
-  const { data } = await axios(`${baseUrl}/auth`, { withCredentials: true })
+  const { data } = await axios(`${baseUrl}auth`, { withCredentials: true })
   return data
 })
 

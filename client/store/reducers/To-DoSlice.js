@@ -2,20 +2,18 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 export const getCategories = createAsyncThunk('To-Do/getCategories', async () => {
-  const { data } = await axios('/api/v1/categories', { withCredentials: true })
+  const { data } = await axios('categories', { withCredentials: true })
   return data
 })
 
 export const getTasks = createAsyncThunk('To-Do/getTasks', async ({ category, timespan }) => {
-  const urlGetTasks = timespan
-    ? `/api/v1/tasks/${category}/${timespan}`
-    : `/api/v1/tasks/${category}`
+  const urlGetTasks = timespan ? `tasks/${category}/${timespan}` : `tasks/${category}`
   const { data } = await axios(urlGetTasks, { withCredentials: true })
   return data
 })
 
 export const addTask = createAsyncThunk('To-Do/addTask', async ({ category, task }) => {
-  const addTaskUrl = `/api/v1/tasks/${category}`
+  const addTaskUrl = `tasks/${category}`
   const { data } = axios.post(
     addTaskUrl,
     { title: task },
@@ -33,7 +31,7 @@ export const updateTask = createAsyncThunk(
   'To-Do/changeStatus',
   async ({ categories, id, payload }) => {
     console.log(payload)
-    const urlUpdateTask = `/api/v1/tasks/${categories}/${id}`
+    const urlUpdateTask = `tasks/${categories}/${id}`
     const { data } = await axios.patch(
       urlUpdateTask,
       {
@@ -51,7 +49,7 @@ export const updateTask = createAsyncThunk(
 )
 
 export const deleteTask = createAsyncThunk('To-Do/deleteTask', async ({ category, id }) => {
-  const urlDeleteTask = `/api/v1/tasks/${category}/${id}`
+  const urlDeleteTask = `tasks/${category}/${id}`
   await axios.delete(urlDeleteTask, { withCredentials: true })
 })
 
